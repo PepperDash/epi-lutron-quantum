@@ -1,14 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Crestron.SimplSharp;
-
+﻿
 namespace LutronQuantum
 {
-	public interface iLutronDevice
+	public interface ILutronDevice
 	{
-		void Initialize();
-		void ParseMessage(string[] message);
+		void DeviceInitialize();
+		void ProcessResponse(string[] message);
 	}
 }
