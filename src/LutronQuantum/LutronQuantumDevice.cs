@@ -8,8 +8,9 @@ using PepperDash.Core;
 using PepperDash.Essentials.Core;
 using PepperDash.Essentials.Core.Bridges;
 using PepperDash.Essentials.Core.Config;
-using PepperDash.Essentials.Core.Lighting;
 using PepperDash.Essentials.Core.Queues;
+using PepperDash.Essentials.Core.Lighting;
+using LightingBase = PepperDash.Essentials.Devices.Common.Lighting.LightingBase;
 
 namespace LutronQuantum
 {
@@ -48,7 +49,7 @@ namespace LutronQuantum
 		{
 			_deviceConfig = deviceConfig;
 
-			Debug.Console(TraceLevel, this, "Constructing new {0} instance", _deviceConfig.Name);
+			//Debug.Console(TraceLevel, this, "Constructing new {0} instance", _deviceConfig.Name);
 
 			ResetDebugLevels();
 
@@ -79,7 +80,7 @@ namespace LutronQuantum
 			_commsRxQueue = new GenericQueue(deviceConfig.Key + "-queue");
 
 			OnlineFeedback = _commsMonitor.IsOnlineFeedback;
-			CommunicationMonitorFeedback = new IntFeedback(() => (int)_commsMonitor.Status);
+			CommunicationMonitorFeedback = new IntFeedback("CommunicationMonitorFeedback", () => (int)_commsMonitor.Status);
 
 			// needed to check for username/password prompts
 			_comms.TextReceived += OnTextReceived;
@@ -91,12 +92,12 @@ namespace LutronQuantum
 			if (socket != null)
 			{
 				socket.ConnectionChange += OnSocketConnectionChange;
-				SocketStatusFeedback = new IntFeedback(() => (int)socket.ClientStatus);
+				SocketStatusFeedback = new IntFeedback("SocketStatusFeedback", () => (int)socket.ClientStatus);
 			}
 
-			Debug.Console(TraceLevel, this, "Constructing new {0} instance complete", _deviceConfig.Name);
-			Debug.Console(TraceLevel, new string('*', 80));
-			Debug.Console(TraceLevel, new string('*', 80));
+			//Debug.Console(TraceLevel, this, "Constructing new {0} instance complete", _deviceConfig.Name);
+			//Debug.Console(TraceLevel, new string('*', 80));
+			//Debug.Console(TraceLevel, new string('*', 80));
 		}
 
 		/// <summary>
@@ -105,7 +106,7 @@ namespace LutronQuantum
 		public override void Initialize()
 		{
 			_comms.Connect();
-			_commsMonitor.StatusChange += (sender, args) => Debug.Console(DebugLevel, this, Debug.ErrorLogLevel.Notice, "Communication monitor state: {0}; message: {1}",
+			_commsMonitor.StatusChange += (sender, args) => Debug.LogDebug(this, "Communication monitor state: {0}; message: {1}",
 				args.Status, args.Message);
 			_commsMonitor.Start();
 
@@ -116,12 +117,12 @@ namespace LutronQuantum
 
 		private void OnCommunicationMonitorStatusChange(object sender, MonitorStatusChangeEventArgs args)
 		{
-			Debug.Console(DebugLevel, this, "Communication Status: ({0}) {1}, {2}", args.Status, args.Status.ToString(), args.Message);
+			Debug.LogDebug(this, "Communication Status: ({0}) {1}, {2}", args.Status, args.Status.ToString(), args.Message);
 		}
 
 		private void OnSocketConnectionChange(object sender, GenericSocketStatusChageEventArgs args)
 		{
-			Debug.Console(DebugLevel, this, Debug.ErrorLogLevel.Notice, "Socket Status: ({0}) {1}",
+			Debug.LogDebug(this,  "Socket Status: ({0}) {1}",
 						args.Client.ClientStatus, args.Client.ClientStatus.ToString());
 
 			//var telnetNegotation = new byte[] { 0xFF, 0xFE, 0x01, 0xFF, 0xFE, 0x21, 0xFF, 0xFC, 0x01, 0xFF, 0xFC, 0x03 };
@@ -168,8 +169,8 @@ namespace LutronQuantum
 		/// <param name="joinMap"></param>
 		protected void LinkLutronQuantumToApi(BasicTriList trilist, LutronQuantumBridgeJoinMap joinMap)
 		{
-			Debug.Console(TraceLevel, "Linking to Trilist '{0}'", trilist.ID.ToString("X"));
-			Debug.Console(TraceLevel, "Linking to Bridge Type {0}", GetType().Name);
+			//Debug.Console(TraceLevel, "Linking to Trilist '{0}'", trilist.ID.ToString("X"));
+			//Debug.Console(TraceLevel, "Linking to Bridge Type {0}", GetType().Name);
 
 			// link joins to bridge
 			trilist.SetString(joinMap.DeviceName.JoinNumber, Name);
@@ -235,7 +236,7 @@ namespace LutronQuantum
 		{
 			if (args == null || string.IsNullOrEmpty(args.Text))
 			{
-				Debug.Console(DebugLevel, this, "OnTextReceived args is null or args.Text is null or empty");
+				Debug.LogDebug(this, "OnTextReceived args is null or args.Text is null or empty");
 				return;
 			}
 
@@ -262,9 +263,9 @@ namespace LutronQuantum
 			}
 			catch (Exception ex)
 			{
-				Debug.Console(DebugLevel, this, Debug.ErrorLogLevel.Error, "OnTextReceived Exception Message: {0}", ex.Message);
-				Debug.Console(VerboseLevel, this, Debug.ErrorLogLevel.Error, "OnTextReceived Exception Stack Trace: {0}", ex.StackTrace);
-				if (ex.InnerException != null) Debug.Console(DebugLevel, this, Debug.ErrorLogLevel.Error, "OnTextReceived Inner Exception: '{0}'", ex.InnerException);
+				Debug.LogDebug(this,  "OnTextReceived Exception Message: {0}", ex.Message);
+				Debug.LogVerbose( this,  "OnTextReceived Exception Stack Trace: {0}", ex.StackTrace);
+				if (ex.InnerException != null) Debug.LogDebug(this,  "OnTextReceived Inner Exception: '{0}'", ex.InnerException);
 			}
 		}
 
@@ -273,13 +274,13 @@ namespace LutronQuantum
 		{
 			if (args == null || string.IsNullOrEmpty(args.Text))
 			{
-				Debug.Console(DebugLevel, this, "OnLineRecieved args is null or args.Text is null or empty");
+				Debug.LogDebug(this, "OnLineRecieved args is null or args.Text is null or empty");
 				return;
 			}
 
 			try
 			{
-				Debug.Console(DebugLevel, this, "OnLineRecieved args.Text: {0}", args.Text);
+				Debug.LogDebug(this, "OnLineRecieved args.Text: {0}", args.Text);
 
 				_commsRxQueue.Enqueue(args.Text.ToLower().Contains("~error")
 					? new ProcessStringMessage(args.Text, ProcessError)
@@ -287,9 +288,9 @@ namespace LutronQuantum
 			}
 			catch (Exception ex)
 			{
-				Debug.Console(DebugLevel, this, Debug.ErrorLogLevel.Error, "OnLineRecieved Exception Message: {0}", ex.Message);
-				Debug.Console(VerboseLevel, this, Debug.ErrorLogLevel.Error, "OnLineRecieved Exception Stack Trace: {0}", ex.StackTrace);
-				if (ex.InnerException != null) Debug.Console(DebugLevel, this, Debug.ErrorLogLevel.Error, "OnLineRecieved Inner Exception: '{0}'", ex.InnerException);
+				Debug.LogDebug(this,  "OnLineRecieved Exception Message: {0}", ex.Message);
+				Debug.LogVerbose( this,  "OnLineRecieved Exception Stack Trace: {0}", ex.StackTrace);
+				if (ex.InnerException != null) Debug.LogDebug(this,  "OnLineRecieved Inner Exception: '{0}'", ex.InnerException);
 			}
 		}
 
@@ -344,14 +345,14 @@ namespace LutronQuantum
 					}
 			}
 
-			Debug.Console(DebugLevel, this, "Integration Error[{0}]: {1}", errNumber, errMessage);
+			Debug.LogDebug(this, "Integration Error[{0}]: {1}", errNumber, errMessage);
 		}
 
 		private void ProcessResponse(string response)
 		{
 			if (string.IsNullOrEmpty(response))
 			{
-				Debug.Console(VerboseLevel, this, "ProcessResponse: response '{0}' is null or empty", response);
+				Debug.LogVerbose( this, "ProcessResponse: response '{0}' is null or empty", response);
 				return;
 			}
 
@@ -372,7 +373,7 @@ namespace LutronQuantum
 
 							if (id != IntegrationId)
 							{
-								Debug.Console(VerboseLevel, this, "Response is not for correct Integration ID");
+								Debug.LogVerbose( this, "Response is not for correct Integration ID");
 								return;
 							}
 
@@ -394,12 +395,12 @@ namespace LutronQuantum
 							ILutronDevice device;
 							if (LutronDevices.TryGetValue(id, out device))
 							{
-								Debug.Console(VerboseLevel, this, "Passing '{1}' to ID-'{0}'", id, data);
+								Debug.LogVerbose( this, "Passing '{1}' to ID-'{0}'", id, data);
 								device.ProcessResponse(data);
 								return;
 							}
 
-							Debug.Console(VerboseLevel, this, "Failed to find device with ID-'{0}'", id);
+							Debug.LogVerbose( this, "Failed to find device with ID-'{0}'", id);
 
 							break;
 						}
@@ -407,9 +408,9 @@ namespace LutronQuantum
 			}
 			catch (Exception ex)
 			{
-				Debug.Console(DebugLevel, this, Debug.ErrorLogLevel.Error, "ProcessResponse Exception Message: {0}", ex.Message);
-				Debug.Console(VerboseLevel, this, Debug.ErrorLogLevel.Error, "ProcessResponse Exception Stack Trace: {0}", ex.StackTrace);
-				if (ex.InnerException != null) Debug.Console(DebugLevel, this, Debug.ErrorLogLevel.Error, "ProcessResponse Inner Exception: '{0}'", ex.InnerException);
+				Debug.LogDebug(this,  "ProcessResponse Exception Message: {0}", ex.Message);
+				Debug.LogVerbose( this,  "ProcessResponse Exception Stack Trace: {0}", ex.StackTrace);
+				if (ex.InnerException != null) Debug.LogDebug(this,  "ProcessResponse Inner Exception: '{0}'", ex.InnerException);
 			}
 		}
 
@@ -423,7 +424,7 @@ namespace LutronQuantum
 		{
 			if (string.IsNullOrEmpty(text)) return;
 
-			Debug.Console(VerboseLevel, this, "SendText: '{0}'", text);
+			Debug.LogVerbose( this, "SendText: '{0}'", text);
 
 			var cmd = string.IsNullOrEmpty(CommsDelimiter)
 				? string.Format("{0}", text)
@@ -437,7 +438,7 @@ namespace LutronQuantum
 		/// </summary>
 		public void SubscribeToFeedback()
 		{
-			Debug.Console(DebugLevel, this, "Sending monitoring subscriptions");
+			Debug.LogDebug(this, "Sending monitoring subscriptions");
 
 			SendText("#MONITORING,6,1");
 			SendText("#MONITORING,8,1");
@@ -459,7 +460,7 @@ namespace LutronQuantum
 		{
 			if (string.IsNullOrEmpty(IntegrationId))
 			{
-				Debug.Console(DebugLevel, this, Debug.ErrorLogLevel.Error, "SelectScene: Integration ID ('{0}') is null or empty, verify configuration", IntegrationId);
+				Debug.LogDebug(this,  "SelectScene: Integration ID ('{0}') is null or empty, verify configuration", IntegrationId);
 				return;
 			}
 
@@ -480,7 +481,7 @@ namespace LutronQuantum
 
 			if (string.IsNullOrEmpty(IntegrationId))
 			{
-				Debug.Console(DebugLevel, this, Debug.ErrorLogLevel.Error, "SelectScene: Integration ID ('{0}') is null or empty, verify configuration'", IntegrationId);
+				Debug.LogDebug(this,  "SelectScene: Integration ID ('{0}') is null or empty, verify configuration'", IntegrationId);
 				return;
 			}
 
@@ -545,7 +546,7 @@ namespace LutronQuantum
 			var props = JsonConvert.DeserializeObject<LutronQuantumPropertiesConfig>(_deviceConfig.Properties.ToString());
 			if (props == null)
 			{
-				Debug.Console(VerboseLevel, this, "SetIngrationId: failed to deserialize config, unable to save new ID");
+				Debug.LogVerbose( this, "SetIngrationId: failed to deserialize config, unable to save new ID");
 				return;
 			}
 
@@ -571,7 +572,7 @@ namespace LutronQuantum
 			var props = JsonConvert.DeserializeObject<LutronQuantumPropertiesConfig>(_deviceConfig.Properties.ToString());
 			if (props == null)
 			{
-				Debug.Console(VerboseLevel, this, "ShadeGroup1IdSet: failed to deserialize config, unable to save new ID");
+				Debug.LogVerbose( this, "ShadeGroup1IdSet: failed to deserialize config, unable to save new ID");
 				return;
 			}
 
@@ -594,7 +595,7 @@ namespace LutronQuantum
 			var props = JsonConvert.DeserializeObject<LutronQuantumPropertiesConfig>(_deviceConfig.Properties.ToString());
 			if (props == null)
 			{
-				Debug.Console(VerboseLevel, this, "ShadeGroup2IdSet: failed to deserialize config, unable to save new ID");
+				Debug.LogVerbose( this, "ShadeGroup2IdSet: failed to deserialize config, unable to save new ID");
 				return;
 			}
 
@@ -613,22 +614,22 @@ namespace LutronQuantum
 		/// </example>
 		public void PrintScenes()
 		{
-			Debug.Console(TraceLevel, this, new string('*', 80));
-			Debug.Console(TraceLevel, this, "Zone ID: {0}", IntegrationId);
+			//Debug.Console(TraceLevel, this, new string('*', 80));
+			//Debug.Console(TraceLevel, this, "Zone ID: {0}", IntegrationId);
 
 			if (LightingScenes == null)
 			{
-				Debug.Console(TraceLevel, this, "LightingScenes List is null");
+				//Debug.Console(TraceLevel, this, "LightingScenes List is null");
 				return;
 			}
 
-			Debug.Console(TraceLevel, this, "Scene List ({0}-items):", LightingScenes.Count);
+			//Debug.Console(TraceLevel, this, "Scene List ({0}-items):", LightingScenes.Count);
 			for (var i = 0; i <= LightingScenes.Count; i++)
 			{
-				Debug.Console(TraceLevel, this, "Scene '{0}': Id-'{1}', Name-'{2}'", i, LightingScenes[i].ID, LightingScenes[i].Name);
+				//Debug.Console(TraceLevel, this, "Scene '{0}': Id-'{1}', Name-'{2}'", i, LightingScenes[i].ID, LightingScenes[i].Name);
 			}
 
-			Debug.Console(TraceLevel, this, new string('*', 80));
+			//Debug.Console(TraceLevel, this, new string('*', 80));
 		}
 
 		/// <summary>

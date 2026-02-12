@@ -45,7 +45,8 @@ namespace LutronQuantum
 			_parentDevice = DeviceManager.GetDeviceForKey(_propertiesConfig.LightingDeviceKey) as LutronQuantumDevice;
 			if (_parentDevice == null)
 			{
-				Debug.Console(0, this, "LutronQuantumDevice device {0} does not exist", _propertiesConfig.LightingDeviceKey);
+				Debug.LogInformation(this, "LutronQuantumDevice device {0} does not exist", _propertiesConfig.LightingDeviceKey);
+				
 			}
 			else
 			{
@@ -80,8 +81,8 @@ namespace LutronQuantum
 				joinMap.SetCustomJoinData(customJoins);
 			}
 
-			Debug.Console(TraceLevel, "Linking to Trilist '{0}'", trilist.ID.ToString("X"));
-			Debug.Console(TraceLevel, "Linking to Bridge Type {0}", GetType().Name);
+			//Debug.Console(TraceLevel, "Linking to Trilist '{0}'", trilist.ID.ToString("X"));
+			//Debug.Console(TraceLevel, "Linking to Bridge Type {0}", GetType().Name);
 
 			// link joins to bridge
 			trilist.SetString(joinMap.DeviceName.JoinNumber, Name);
@@ -89,7 +90,7 @@ namespace LutronQuantum
 			foreach (var item in Feedbacks)
 			{
 				var join = Int32.Parse(item.Key) + joinMap.ContactClosure.JoinNumber - 1;
-				Debug.Console(VerboseLevel, this, "Linking key-{0} join-{1}", item.Key, join);
+				Debug.LogVerbose( this, "Linking key-{0} join-{1}", item.Key, join);
 				item.Value.Feedback.LinkInputSig(trilist.BooleanInput[(uint) @join]);
 			}
 		}
@@ -146,7 +147,7 @@ namespace LutronQuantum
 		/// </example>
 		public void ProcessResponse(string[] message)
 		{
-			Debug.Console(DebugLevel, this, "ProcessResponse: {0},{1},{2},{3}", message[0], message[1], message[2], message[3]);
+			Debug.LogDebug(this, "ProcessResponse: {0},{1},{2},{3}", message[0], message[1], message[2], message[3]);
 
 			BoolWithFeedback fb;
 			if (!Feedbacks.TryGetValue(message[2], out fb)) return;
