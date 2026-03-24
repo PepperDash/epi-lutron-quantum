@@ -18,7 +18,7 @@ namespace LutronQuantum
 
 			// In the constructor we initialize the list with the typenames that will build an instance of this device
 			// only include unique typenames, when the constructur is used all the typenames will be evaluated in lower case.
-			TypeNames = new List<string> { "lutronQuantum" };
+			TypeNames = new List<string> { "lutronQuantum", "lutronQs" };
 		}
 
 		/// <summary>
@@ -42,7 +42,11 @@ namespace LutronQuantum
 
 				// build the plugin device comms (for all other comms methods) & check for null			
 				var comms = CommFactory.CreateCommForDevice(dc);
-				if (comms != null) return new LutronQuantumDevice(dc, propertiesConfig, comms);
+				if (comms != null)
+				{
+					var useDeviceCommands = dc.Type.Equals("lutronQs", StringComparison.OrdinalIgnoreCase);
+					return new LutronQuantumDevice(dc, propertiesConfig, comms, useDeviceCommands);
+				}
 				Debug.LogInformation("[{0}] Factory: failed to create comm for {1}", dc.Key, dc.Name);
 				return null;
 			}

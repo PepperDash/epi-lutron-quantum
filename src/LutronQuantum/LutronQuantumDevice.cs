@@ -42,9 +42,11 @@ namespace LutronQuantum
 		public string Username;
 		public string Password;
 
+		private readonly bool _useDeviceCommands;
+
 		public Dictionary<string, ILutronDevice> LutronDevices = new Dictionary<string, ILutronDevice>();
 
-		public LutronQuantumDevice(DeviceConfig deviceConfig, LutronQuantumPropertiesConfig propsConfig, IBasicCommunication comms)
+		public LutronQuantumDevice(DeviceConfig deviceConfig, LutronQuantumPropertiesConfig propsConfig, IBasicCommunication comms, bool useDeviceCommands = false)
 			: base(deviceConfig.Key, deviceConfig.Name)
 		{
 			_deviceConfig = deviceConfig;
@@ -56,6 +58,7 @@ namespace LutronQuantum
 			IntegrationId = propsConfig.IntegrationId;
 			ShadeGroup1Id = propsConfig.ShadeGroup1Id;
 			ShadeGroup2Id = propsConfig.ShadeGroup2Id;
+			_useDeviceCommands = useDeviceCommands;
 
 			Username = string.IsNullOrEmpty(propsConfig.Username) 
 				? propsConfig.Control.TcpSshProperties.Username 
@@ -387,10 +390,23 @@ namespace LutronQuantum
 
 							break;
 						}
-					// (pdf pg.161) ~DEVICE,{integrationId},{action_number},{parameters}
+					// (pdf pg.161) ~DEVICE,{integrationId},{componentNumber},{action_number},{parameters}
 					case "~device":
 						{
 							var id = data[1];
+
+							// when operating in device-command mode, handle scene feedback for our own integration ID
+							if (_useDeviceCommands && id == IntegrationId)
+							{
+								if (data.Length >= 4 && Int32.Parse(data[3]) == (int)ELutronAction.Scene)
+								{
+									// component number (data[2]) identifies which scene/button was activated
+									var sceneId = data[2];
+									CurrentLightingScene = LightingScenes.FirstOrDefault(s => s.ID.Equals(sceneId));
+									OnLightingSceneChange();
+								}
+								break;
+							}
 
 							ILutronDevice device;
 							if (LutronDevices.TryGetValue(id, out device))
@@ -464,7 +480,7 @@ namespace LutronQuantum
 				return;
 			}
 
-			// query scene
+			// query scene — always via AREA since raise/lower/stop have no per-scene component
 			var cmd = string.Format("{0}AREA,{1},{2}", CommsGet, IntegrationId, (int)ELutronAction.Scene);
 			SendText(cmd);
 		}
@@ -485,8 +501,16 @@ namespace LutronQuantum
 				return;
 			}
 
-			var cmd = string.Format("{0}AREA,{1},{2},{3}", CommsSet, IntegrationId, (int)ELutronAction.Scene, scene.ID);
-			SendText(cmd);
+			// #DEVICE uses scene.ID as the component number; send press then release
+			if (_useDeviceCommands)
+			{
+				SendText(string.Format("{0}DEVICE,{1},{2},3", CommsSet, IntegrationId, scene.ID));
+				SendText(string.Format("{0}DEVICE,{1},{2},4", CommsSet, IntegrationId, scene.ID));
+			}
+			else
+			{
+				SendText(string.Format("{0}AREA,{1},{2},{3}", CommsSet, IntegrationId, (int)ELutronAction.Scene, scene.ID));
+			}
 		}
 
 		/// <summary>
@@ -503,7 +527,7 @@ namespace LutronQuantum
 		/// </summary>
 		public void MasterLower()
 		{
-			var cmd = string.Format("{0}AREA,{1},{2}", CommsSet, IntegrationId, (int)ELutronAction.Raise);
+			var cmd = string.Format("{0}AREA,{1},{2}", CommsSet, IntegrationId, (int)ELutronAction.Lower);
 			SendText(cmd);
 		}
 
