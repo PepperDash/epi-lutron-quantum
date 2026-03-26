@@ -254,6 +254,10 @@ namespace LutronQuantum
 					SendText(Password);
 					_subscribeAfterLogin = new CTimer(x => SubscribeToFeedback(), null, 5000);
 				}
+				else if (args.Text.ToLower().Contains("enable passphrase"))
+				{
+					SendText("no");
+				}
 				else if (args.Text.ToLower().Contains("access granted"))
 				{
 					if (_subscribeAfterLogin != null)
