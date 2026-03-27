@@ -4,6 +4,7 @@ using System.Linq;
 using Crestron.SimplSharp;
 using Crestron.SimplSharpPro.DeviceSupport;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using PepperDash.Core;
 using PepperDash.Essentials.Core;
 using PepperDash.Essentials.Core.Bridges;
@@ -584,7 +585,7 @@ namespace LutronQuantum
 			props.IntegrationId = id;
 			IntegrationId = id;
 
-			_deviceConfig.Properties = JsonConvert.SerializeObject(props);
+			_deviceConfig.Properties = JObject.FromObject(props);
 			ConfigWriter.UpdateDeviceConfig(_deviceConfig);
 		}
 
@@ -607,7 +608,7 @@ namespace LutronQuantum
 			props.ShadeGroup1Id = id;
 			ShadeGroup1Id = id;
 
-			_deviceConfig.Properties = JsonConvert.SerializeObject(props);
+			_deviceConfig.Properties = JObject.FromObject(props);
 			ConfigWriter.UpdateDeviceConfig(_deviceConfig);
 		}
 
@@ -630,7 +631,7 @@ namespace LutronQuantum
 			props.ShadeGroup2Id = id;
 			ShadeGroup2Id = id;
 
-			_deviceConfig.Properties = JsonConvert.SerializeObject(props);
+			_deviceConfig.Properties = JObject.FromObject(props);
 			ConfigWriter.UpdateDeviceConfig(_deviceConfig);
 		}
 
