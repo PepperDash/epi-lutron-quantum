@@ -572,20 +572,19 @@ namespace LutronQuantum
 			if (String.IsNullOrEmpty(id))
 				return;
 
-			var props = JsonConvert.DeserializeObject<LutronQuantumPropertiesConfig>(_deviceConfig.Properties.ToString());
+			var props = _deviceConfig.Properties as JObject;
 			if (props == null)
 			{
-				Debug.LogVerbose( this, "SetIngrationId: failed to deserialize config, unable to save new ID");
+				Debug.LogVerbose(this, "SetIntegrationId: Properties is not a JObject, unable to save new ID");
 				return;
 			}
 
-			if (props.IntegrationId.Equals(id))
+			if (props.Value<string>("integrationId") == id)
 				return;
 
-			props.IntegrationId = id;
+			props["integrationId"] = id;
 			IntegrationId = id;
 
-			_deviceConfig.Properties = JObject.FromObject(props);
 			ConfigWriter.UpdateDeviceConfig(_deviceConfig);
 		}
 
@@ -598,17 +597,16 @@ namespace LutronQuantum
 			if (String.IsNullOrEmpty(id))
 				return;
 
-			var props = JsonConvert.DeserializeObject<LutronQuantumPropertiesConfig>(_deviceConfig.Properties.ToString());
+			var props = _deviceConfig.Properties as JObject;
 			if (props == null)
 			{
-				Debug.LogVerbose( this, "ShadeGroup1IdSet: failed to deserialize config, unable to save new ID");
+				Debug.LogVerbose(this, "SetShadeGroup1Id: Properties is not a JObject, unable to save new ID");
 				return;
 			}
 
-			props.ShadeGroup1Id = id;
+			props["shadeGroup1Id"] = id;
 			ShadeGroup1Id = id;
 
-			_deviceConfig.Properties = JObject.FromObject(props);
 			ConfigWriter.UpdateDeviceConfig(_deviceConfig);
 		}
 
@@ -621,17 +619,16 @@ namespace LutronQuantum
 			if (String.IsNullOrEmpty(id))
 				return;
 
-			var props = JsonConvert.DeserializeObject<LutronQuantumPropertiesConfig>(_deviceConfig.Properties.ToString());
+			var props = _deviceConfig.Properties as JObject;
 			if (props == null)
 			{
-				Debug.LogVerbose( this, "ShadeGroup2IdSet: failed to deserialize config, unable to save new ID");
+				Debug.LogVerbose(this, "SetShadeGroup2Id: Properties is not a JObject, unable to save new ID");
 				return;
 			}
 
-			props.ShadeGroup2Id = id;
+			props["shadeGroup2Id"] = id;
 			ShadeGroup2Id = id;
 
-			_deviceConfig.Properties = JObject.FromObject(props);
 			ConfigWriter.UpdateDeviceConfig(_deviceConfig);
 		}
 
