@@ -108,6 +108,26 @@
 }
 ```
 
+## Lutron NWK Login Usage (nwk vs nwk2)
+
+For all integrations with the Lutron QSE-CI-NWK-E, the **nwk** login should be used instead of nwk2.
+
+### Reason
+
+The `nwk` user automatically terminates any existing session using the same login when a new connection is established. This behavior allows the system to recover from stale or orphaned sessions without requiring a reboot.
+
+In contrast:
+
+- The `nwk2` user does not reliably replace existing sessions, which can lead to persistent "login: connection in use" errors if a previous session was not properly closed.
+
+### Important Note (Passphrase Prompt)
+
+On first-time setup, logging in with either `nwk` or `nwk2` may trigger a prompt to set a passphrase. The integration must handle this prompt correctly (e.g., respond "no" if not using a passphrase), otherwise the login process will remain incomplete and can lead to stuck sessions.
+
+### Conclusion
+
+Standardizing on `nwk` ensures more reliable connection handling and prevents lockout conditions caused by stale Telnet sessions, provided the initial passphrase prompt is handled correctly.
+
 ## Join Map
 
 ### Lutron Quantum Lighing BridgeJoinMap
