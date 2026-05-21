@@ -20,6 +20,7 @@ namespace LutronQuantum
 		private readonly DeviceConfig _deviceConfig;
 
 		private readonly IBasicCommunication _comms;
+		private readonly ISocketStatus _socket;
 		private readonly GenericCommunicationMonitor _commsMonitor;
 		private readonly GenericQueue _commsRxQueue;
 
@@ -83,7 +84,7 @@ namespace LutronQuantum
 			_commsMonitor.StatusChange += OnCommunicationMonitorStatusChange;
 			_commsRxQueue = new GenericQueue(deviceConfig.Key + "-queue");
 
-			OnlineFeedback = _commsMonitor.IsOnlineFeedback;
+			OnlineFeedback = new BoolFeedback("OnlineFeedback", GetOnlineStatus);
 			CommunicationMonitorFeedback = new IntFeedback("CommunicationMonitorFeedback", () => (int)_commsMonitor.Status);
 
 			// needed to check for username/password prompts
@@ -92,11 +93,11 @@ namespace LutronQuantum
 			var commsGather = new CommunicationGather(_comms, CommsDelimiter);
 			commsGather.LineReceived += OnLineRecieved;
 
-			var socket = _comms as ISocketStatus;
-			if (socket != null)
+			_socket = _comms as ISocketStatus;
+			if (_socket != null)
 			{
-				socket.ConnectionChange += OnSocketConnectionChange;
-				SocketStatusFeedback = new IntFeedback("SocketStatusFeedback", () => (int)socket.ClientStatus);
+				_socket.ConnectionChange += OnSocketConnectionChange;
+				SocketStatusFeedback = new IntFeedback("SocketStatusFeedback", () => (int)_socket.ClientStatus);
 			}
 
 			//Debug.Console(TraceLevel, this, "Constructing new {0} instance complete", _deviceConfig.Name);
@@ -122,6 +123,8 @@ namespace LutronQuantum
 		private void OnCommunicationMonitorStatusChange(object sender, MonitorStatusChangeEventArgs args)
 		{
 			Debug.LogDebug(this, "Communication Status: ({0}) {1}, {2}", args.Status, args.Status.ToString(), args.Message);
+			OnlineFeedback.FireUpdate();
+			CommunicationMonitorFeedback.FireUpdate();
 		}
 
 		private void OnSocketConnectionChange(object sender, GenericSocketStatusChageEventArgs args)
@@ -129,11 +132,28 @@ namespace LutronQuantum
 			Debug.LogDebug(this,  "Socket Status: ({0}) {1}",
 						args.Client.ClientStatus, args.Client.ClientStatus.ToString());
 
+			OnlineFeedback.FireUpdate();
+			if (SocketStatusFeedback != null)
+				SocketStatusFeedback.FireUpdate();
+
 			//var telnetNegotation = new byte[] { 0xFF, 0xFE, 0x01, 0xFF, 0xFE, 0x21, 0xFF, 0xFC, 0x01, 0xFF, 0xFC, 0x03 };
 			//if (args.Client.IsConnected)
 			//{
 			//	args.Client.SendBytes(telnetNegotation);
 			//}
+		}
+
+		private bool GetOnlineStatus()
+		{
+			if (_commsMonitor.IsOnline)
+				return true;
+
+
+			if (_socket != null && _socket.IsConnected && string.IsNullOrEmpty(IntegrationId))
+				return true;
+
+
+			return false;
 		}
 
 		#region Overrides of EssentialsBridgeableDevice
