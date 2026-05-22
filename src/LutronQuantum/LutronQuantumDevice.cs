@@ -80,7 +80,8 @@ namespace LutronQuantum
 			var warningTimeoutMs = propsConfig.WarningTimeoutMs ?? 180000;
 			var errorTimeoutMs = propsConfig.ErrorTimeoutMs ?? 300000;
 
-			_commsMonitor = new GenericCommunicationMonitor(this, _comms, pollTime, warningTimeoutMs, errorTimeoutMs, Poll);
+			_commsMonitor = new GenericCommunicationMonitor(this, _comms, pollTime, warningTimeoutMs, errorTimeoutMs, Poll,
+				_commsIsRs232);
 			_commsMonitor.StatusChange += OnCommunicationMonitorStatusChange;
 			_commsRxQueue = new GenericQueue(deviceConfig.Key + "-queue");
 
@@ -536,6 +537,9 @@ namespace LutronQuantum
 			{
 				SendText(string.Format("{0}AREA,{1},{2},{3}", CommsSet, IntegrationId, (int)ELutronAction.Scene, scene.ID));
 			}
+
+			// Request immediate state sync so scene feedback updates without waiting for monitor poll interval.
+			Poll();
 		}
 
 		/// <summary>
