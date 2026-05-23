@@ -26,6 +26,8 @@ namespace LutronQuantum
 
 		private const string CommsDelimiter = "\r\n";
 		private readonly bool _commsIsRs232;
+		private readonly long _inboundCommsOnlineTimeoutMs;
+		private long _lastInboundCommsTicks;
 
 		private const string CommsSet = "#";
 		private const string CommsGet = "?";
@@ -79,6 +81,7 @@ namespace LutronQuantum
 			var pollTime = propsConfig.PollTimeMs ?? 60000;
 			var warningTimeoutMs = propsConfig.WarningTimeoutMs ?? 180000;
 			var errorTimeoutMs = propsConfig.ErrorTimeoutMs ?? 300000;
+			_inboundCommsOnlineTimeoutMs = errorTimeoutMs;
 
 			_commsMonitor = new GenericCommunicationMonitor(this, _comms, pollTime, warningTimeoutMs, errorTimeoutMs, Poll,
 				_commsIsRs232);
@@ -148,6 +151,13 @@ namespace LutronQuantum
 		{
 			if (_commsMonitor.IsOnline)
 				return true;
+
+			if (_commsIsRs232 && _lastInboundCommsTicks > 0)
+			{
+				var elapsedMs = new TimeSpan(DateTime.UtcNow.Ticks - _lastInboundCommsTicks).TotalMilliseconds;
+				if (elapsedMs <= _inboundCommsOnlineTimeoutMs)
+					return true;
+			}
 
 
 			if (_socket != null && _socket.IsConnected && string.IsNullOrEmpty(IntegrationId))
@@ -267,6 +277,8 @@ namespace LutronQuantum
 
 			try
 			{
+				MarkInboundComms();
+
 				if (args.Text.ToLower().Contains("login:"))
 				{
 					SendText(Username);
@@ -309,6 +321,8 @@ namespace LutronQuantum
 
 			try
 			{
+				MarkInboundComms();
+
 				Debug.LogDebug(this, "OnLineRecieved args.Text: {0}", args.Text);
 
 				_commsRxQueue.Enqueue(args.Text.ToLower().Contains("~error")
@@ -321,6 +335,12 @@ namespace LutronQuantum
 				Debug.LogVerbose( this,  "OnLineRecieved Exception Stack Trace: {0}", ex.StackTrace);
 				if (ex.InnerException != null) Debug.LogDebug(this,  "OnLineRecieved Inner Exception: '{0}'", ex.InnerException);
 			}
+		}
+
+		private void MarkInboundComms()
+		{
+			_lastInboundCommsTicks = DateTime.UtcNow.Ticks;
+			OnlineFeedback.FireUpdate();
 		}
 
 		private void ProcessError(string error)
