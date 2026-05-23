@@ -93,6 +93,7 @@ namespace LutronQuantum
 
 			// needed to check for username/password prompts
 			_comms.TextReceived += OnTextReceived;
+			_comms.BytesReceived += OnBytesReceived;
 
 			var commsGather = new CommunicationGather(_comms, CommsDelimiter);
 			commsGather.LineReceived += OnLineRecieved;
@@ -127,6 +128,7 @@ namespace LutronQuantum
 		private void OnCommunicationMonitorStatusChange(object sender, MonitorStatusChangeEventArgs args)
 		{
 			Debug.LogDebug(this, "Communication Status: ({0}) {1}, {2}", args.Status, args.Status.ToString(), args.Message);
+			DebugOnlineStatus("CommsMonitorStatusChange");
 			OnlineFeedback.FireUpdate();
 			CommunicationMonitorFeedback.FireUpdate();
 		}
@@ -136,6 +138,7 @@ namespace LutronQuantum
 			Debug.LogDebug(this,  "Socket Status: ({0}) {1}",
 						args.Client.ClientStatus, args.Client.ClientStatus.ToString());
 
+			DebugOnlineStatus("SocketConnectionChange");
 			OnlineFeedback.FireUpdate();
 			if (SocketStatusFeedback != null)
 				SocketStatusFeedback.FireUpdate();
@@ -152,7 +155,7 @@ namespace LutronQuantum
 			if (_commsMonitor.IsOnline)
 				return true;
 
-			if (_commsIsRs232 && _lastInboundCommsTicks > 0)
+			if (_lastInboundCommsTicks > 0)
 			{
 				var elapsedMs = new TimeSpan(DateTime.UtcNow.Ticks - _lastInboundCommsTicks).TotalMilliseconds;
 				if (elapsedMs <= _inboundCommsOnlineTimeoutMs)
@@ -310,6 +313,14 @@ namespace LutronQuantum
 			}
 		}
 
+		private void OnBytesReceived(object sender, GenericCommMethodReceiveBytesArgs args)
+		{
+			if (args == null || args.Bytes == null || args.Bytes.Length == 0)
+				return;
+
+			MarkInboundComms();
+		}
+
 		// commonly used with ASCII based API's with a defined delimiter				
 		private void OnLineRecieved(object sender, GenericCommMethodReceiveTextArgs args)
 		{
@@ -340,7 +351,26 @@ namespace LutronQuantum
 		private void MarkInboundComms()
 		{
 			_lastInboundCommsTicks = DateTime.UtcNow.Ticks;
+			DebugOnlineStatus("InboundComms");
 			OnlineFeedback.FireUpdate();
+		}
+
+		// Temporary diagnostics to correlate online transitions with monitor/socket/heartbeat inputs.
+		private void DebugOnlineStatus(string reason)
+		{
+			var hasHeartbeat = _lastInboundCommsTicks > 0;
+			var heartbeatAgeMs = hasHeartbeat
+				? (long)new TimeSpan(DateTime.UtcNow.Ticks - _lastInboundCommsTicks).TotalMilliseconds
+				: -1;
+			var heartbeatFresh = hasHeartbeat && heartbeatAgeMs <= _inboundCommsOnlineTimeoutMs;
+			var socketConnected = _socket != null && _socket.IsConnected;
+			var commsConnected = _comms != null && _comms.IsConnected;
+			var computedOnline = GetOnlineStatus();
+
+			Debug.LogDebug(this,
+				"Online Debug[{0}] online={1}, commsConnected={2}, monitorStatus={3}, monitorOnline={4}, socketConnected={5}, heartbeatFresh={6}, heartbeatAgeMs={7}, heartbeatTimeoutMs={8}, commsIsRs232={9}, integrationIdEmpty={10}",
+				reason, computedOnline, commsConnected, _commsMonitor.Status, _commsMonitor.IsOnline, socketConnected,
+				heartbeatFresh, heartbeatAgeMs, _inboundCommsOnlineTimeoutMs, _commsIsRs232, string.IsNullOrEmpty(IntegrationId));
 		}
 
 		private void ProcessError(string error)
