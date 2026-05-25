@@ -15,7 +15,7 @@ using LightingBase = PepperDash.Essentials.Devices.Common.Lighting.LightingBase;
 
 namespace LutronQuantum
 {
-	public class LutronQuantumDevice : LightingBase
+	public class LutronQuantumDevice : LightingBase, ICommunicationMonitor
 	{
 		private readonly DeviceConfig _deviceConfig;
 
@@ -77,6 +77,7 @@ namespace LutronQuantum
 
 			_comms = comms;
 			_commsIsRs232 = propsConfig.Control.Method == eControlMethod.Com;
+			var monitorBytesReceived = _commsIsRs232;
 
 			var pollTime = propsConfig.PollTimeMs ?? 60000;
 			var warningTimeoutMs = propsConfig.WarningTimeoutMs ?? 180000;
@@ -84,7 +85,7 @@ namespace LutronQuantum
 			_inboundCommsOnlineTimeoutMs = errorTimeoutMs;
 
 			_commsMonitor = new GenericCommunicationMonitor(this, _comms, pollTime, warningTimeoutMs, errorTimeoutMs, Poll,
-				_commsIsRs232);
+				monitorBytesReceived);
 			_commsMonitor.StatusChange += OnCommunicationMonitorStatusChange;
 			_commsRxQueue = new GenericQueue(deviceConfig.Key + "-queue");
 
