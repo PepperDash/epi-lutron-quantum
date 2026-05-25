@@ -198,3 +198,106 @@ devjson:1 {"deviceKey":"lights1", "methodName":"ShadeGroupLower", "params":[1]}
 devjson:1 {"deviceKey":"lights1", "methodName":"ResetDebugLevels", "params":[]}
 devjson:1 {"deviceKey":"lights1", "methodName":"SetDebugLevels", "params":[2]}
 ```
+<!-- START Minimum Essentials Framework Versions -->
+### Minimum Essentials Framework Versions
+
+- 2.12.1
+- 2.12.1
+<!-- END Minimum Essentials Framework Versions -->
+<!-- START Config Example -->
+### Config Example
+
+```json
+{
+    "key": "GeneratedKey",
+    "uid": 1,
+    "name": "GeneratedName",
+    "type": "LutronQuantumProperties",
+    "group": "Group",
+    "properties": {
+        "control": "SampleValue",
+        "username": "SampleString",
+        "password": "SampleString",
+        "pollTimeMs": 0,
+        "warningTimeoutMs": 0,
+        "errorTimeoutMs": 0,
+        "integrationId": "SampleString",
+        "shadeGroup1Id": "SampleString",
+        "shadeGroup2Id": "SampleString",
+        "scenes": [
+            "SampleValue"
+        ]
+    }
+}
+```
+<!-- END Config Example -->
+<!-- START Supported Types -->
+
+<!-- END Supported Types -->
+<!-- START Join Maps -->
+### Join Maps
+
+#### Digitals
+
+| Join | Type (RW) | Description |
+| --- | --- | --- |
+| 1 | R | Contact closure feedback |
+
+#### Serials
+
+| Join | Type (RW) | Description |
+| --- | --- | --- |
+| 1 | R | Device Name |
+<!-- END Join Maps -->
+<!-- START Interfaces Implemented -->
+### Interfaces Implemented
+
+- ICommunicationMonitor
+- ILutronDevice
+<!-- END Interfaces Implemented -->
+<!-- START Base Classes -->
+### Base Classes
+
+- LightingBase
+- GenericLightingJoinMap
+- JoinMapBaseAdvanced
+- EssentialsBridgeableDevice
+<!-- END Base Classes -->
+<!-- START Public Methods -->
+### Public Methods
+
+- public void SendText(string text)
+- public void SubscribeToFeedback()
+- public void Poll()
+- public void MasterRaise()
+- public void MasterLower()
+- public void MasterRaiseLowerStop()
+- public void ShadeGroupRaise(string id)
+- public void ShadeGroupLower(string id)
+- public void SetIntegrationId(string id)
+- public void SetShadeGroup1Id(string id)
+- public void SetShadeGroup2Id(string id)
+- public void PrintScenes()
+- public void AddDevice(string integrationId, ILutronDevice device)
+- public void ResetDebugLevels()
+- public void SetDebugLevels(uint level)
+- public void DeviceInitialize()
+- public void ProcessResponse(string[] message)
+- public void ResetDebugLevels()
+- public void SetDebugLevels(uint level)
+<!-- END Public Methods -->
+<!-- START Bool Feedbacks -->
+### Bool Feedbacks
+
+- Feedback
+- OnlineFeedback
+<!-- END Bool Feedbacks -->
+<!-- START Int Feedbacks -->
+### Int Feedbacks
+
+- CommunicationMonitorFeedback
+- SocketStatusFeedback
+<!-- END Int Feedbacks -->
+<!-- START String Feedbacks -->
+
+<!-- END String Feedbacks -->
