@@ -428,7 +428,15 @@ namespace LutronQuantum
 			Debug.LogDebug(this, "Integration Error[{0}]: {1}", errNumber, errMessage);
 		}
 
-		private void ProcessResponse(string response)
+		/// <summary>
+		/// Processes a delimited response from the device.
+		/// </summary>
+		/// <remarks>
+		/// Virtual so a multi-area subclass can route responses to per-area children before
+		/// falling back to this single-area handling.
+		/// </remarks>
+		/// <param name="response">Delimited response</param>
+		protected virtual void ProcessResponse(string response)
 		{
 			if (string.IsNullOrEmpty(response))
 			{
@@ -529,6 +537,10 @@ namespace LutronQuantum
 		/// <summary>
 		/// Subscribes to feedback
 		/// </summary>
+		/// <remarks>
+		/// Called once the device is ready to accept commands — on "access granted", on the timer
+		/// armed after the password is sent, and at startup for RS232.
+		/// </remarks>
 		public void SubscribeToFeedback()
 		{
 			Debug.LogDebug(this, "Sending monitoring subscriptions");
@@ -541,6 +553,13 @@ namespace LutronQuantum
 			{
 				device.DeviceInitialize();
 			}
+
+			// The communication monitor starts its poll timer with a due time of zero the moment
+			// the socket connects, so the first poll goes out before the login exchange has
+			// finished and the device discards it. Nothing would then refresh state until the next
+			// poll interval, leaving scene feedback stale for up to a minute after a restart.
+			// Take a reading now that the device is actually listening.
+			Poll();
 		}
 
 		/// <summary>
@@ -549,7 +568,7 @@ namespace LutronQuantum
 		/// <example>
 		/// devjson:1 {"deviceKey":"{deviceKey}", "methodName":"Poll", "params":[]}
 		/// </example>
-		public void Poll()
+		public virtual void Poll()
 		{
 			if (string.IsNullOrEmpty(IntegrationId))
 			{
