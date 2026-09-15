@@ -138,15 +138,20 @@ namespace LutronQuantum
 		/// </remarks>
 		private void LinkScenesToApi(BasicTriList trilist, LutronQuantumAreaJoinMap joinMap)
 		{
-			trilist.SetUShortSigAction(joinMap.SelectSceneByIndex.JoinNumber, index =>
+			trilist.SetUShortSigAction(joinMap.SelectSceneByIndex.JoinNumber, number =>
 			{
-				if (index >= LightingScenes.Count)
+				// 1-based with zero reserved, matching how DisplayBase treats its own analog
+				// select. SIMPL can push a zero on an analog join as an EISC comes online, and a
+				// zero-based index would recall the first scene on every reconnect.
+				if (number == 0) return;
+
+				if (number > LightingScenes.Count)
 				{
-					Debug.LogDebug(this, "Scene index {0} is out of range; {1} scene(s) configured", index, LightingScenes.Count);
+					Debug.LogDebug(this, "Scene {0} is out of range; {1} scene(s) configured", number, LightingScenes.Count);
 					return;
 				}
 
-				SelectScene(LightingScenes[index]);
+				SelectScene(LightingScenes[number - 1]);
 			});
 
 			var span = joinMap.SelectSceneDirect.JoinSpan;

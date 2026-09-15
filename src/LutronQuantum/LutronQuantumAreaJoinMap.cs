@@ -109,19 +109,24 @@ namespace LutronQuantum
 			});
 
 		/// <summary>
-		/// Recall a scene by index
+		/// Recall a scene by number
 		/// </summary>
 		/// <remarks>
 		/// Analog, not digital — the inherited map declared this as a digital while the framework
-		/// wired it as an analog. The value is a zero-based index into the configured scenes, so 0
-		/// is the first scene; an index past the end is ignored rather than throwing.
+		/// wired it as an analog.
+		///
+		/// The value is 1-based with zero reserved, matching how <c>DisplayBase</c> treats its own
+		/// analog select. The framework's lighting helper is zero-based instead, which is unsafe on
+		/// an EISC: SIMPL can push a zero on an analog join as the bridge comes online, and that
+		/// would recall the first scene every time the link re-established. Here zero does nothing,
+		/// and a number past the last configured scene is logged and ignored rather than throwing.
 		/// </remarks>
 		[JoinName("SelectSceneByIndex")]
 		public JoinDataComplete SelectSceneByIndex = new JoinDataComplete(
 			new JoinData { JoinNumber = 1, JoinSpan = 1 },
 			new JoinMetadata
 			{
-				Description = "Recall area scene by zero-based index (0 = first configured scene)",
+				Description = "Recall area scene by number (1 = first configured scene; 0 is ignored)",
 				JoinCapabilities = eJoinCapabilities.FromSIMPL,
 				JoinType = eJoinType.Analog
 			});
