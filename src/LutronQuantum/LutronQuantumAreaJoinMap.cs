@@ -1,4 +1,4 @@
-using PepperDash.Essentials.Core;
+﻿using PepperDash.Essentials.Core;
 using PepperDash.Essentials.Core.Bridges;
 
 namespace LutronQuantum
@@ -7,45 +7,87 @@ namespace LutronQuantum
 	/// Bridge join map for a single lighting area of a multi-area system.
 	/// </summary>
 	/// <remarks>
-	/// Deliberately keeps the scene layout inherited from <see cref="GenericLightingJoinMap"/> —
-	/// scene select at 11 and visibility at 41 — so an area bridges the same way a single-area
-	/// <c>lutronQuantum</c> device always has. Shades and buttons are separate devices with their
-	/// own maps, so nothing beyond lighting appears here.
+	/// Declares every join rather than inheriting <c>GenericLightingJoinMap</c>. That map was
+	/// written when a lighting device was the whole controller, so its descriptions all read
+	/// "Lighting Controller ..." — on a per-area child only the online join is controller-wide (it
+	/// reports the shared NWK connection); everything else belongs to one area. It also declares
+	/// SelectScene as Digital while <c>LinkLightingToApi</c> wires it with
+	/// <c>SetUShortSigAction</c>, so the generated documentation sends integrators to the wrong
+	/// signal type.
 	///
-	/// Inherited from GenericLightingJoinMap:
-	///   Digital  IsOnline            1
-	///   Digital  SelectScene         1
-	///   Digital  SelectSceneDirect  11 (span 10)
-	///   Digital  ButtonVisibility   41 (span 10)
-	///   Serial   IntegrationIdSet    1
+	/// Join numbers are unchanged from that map, so this is a re-description rather than a
+	/// re-layout: scene select on 11, visibility on 41, raise/lower on 2 and 3.
 	/// </remarks>
-	public class LutronQuantumAreaJoinMap : GenericLightingJoinMap
+	public class LutronQuantumAreaJoinMap : JoinMapBaseAdvanced
 	{
 		#region Digital
 
 		/// <summary>
-		/// Raise the area while held, stop on release
+		/// Online status of the shared connection
+		/// </summary>
+		[JoinName("IsOnline")]
+		public JoinDataComplete IsOnline = new JoinDataComplete(
+			new JoinData { JoinNumber = 1, JoinSpan = 1 },
+			new JoinMetadata
+			{
+				Description = "Lighting system online (shared connection, not per area)",
+				JoinCapabilities = eJoinCapabilities.ToSIMPL,
+				JoinType = eJoinType.Digital
+			});
+
+		/// <summary>
+		/// Raise the area while held
 		/// </summary>
 		[JoinName("Raise")]
 		public JoinDataComplete Raise = new JoinDataComplete(
 			new JoinData { JoinNumber = 2, JoinSpan = 1 },
 			new JoinMetadata
 			{
-				Description = "Raise lighting level while held, stop on release",
+				Description = "Area raise while held, stop on release",
 				JoinCapabilities = eJoinCapabilities.FromSIMPL,
 				JoinType = eJoinType.Digital
 			});
 
 		/// <summary>
-		/// Lower the area while held, stop on release
+		/// Lower the area while held
 		/// </summary>
 		[JoinName("Lower")]
 		public JoinDataComplete Lower = new JoinDataComplete(
 			new JoinData { JoinNumber = 3, JoinSpan = 1 },
 			new JoinMetadata
 			{
-				Description = "Lower lighting level while held, stop on release",
+				Description = "Area lower while held, stop on release",
 				JoinCapabilities = eJoinCapabilities.FromSIMPL,
+				JoinType = eJoinType.Digital
+			});
+
+		/// <summary>
+		/// Recall a scene, scene-active feedback, and the scene name
+		/// </summary>
+		/// <remarks>
+		/// DigitalSerial, so this occupies both halves: the digital recalls the scene and reports
+		/// high while it is active, and the serial at the same number carries its name.
+		/// </remarks>
+		[JoinName("SelectSceneDirect")]
+		public JoinDataComplete SelectSceneDirect = new JoinDataComplete(
+			new JoinData { JoinNumber = 11, JoinSpan = 10 },
+			new JoinMetadata
+			{
+				Description = "Recall area scene (1-10), high while active; serial carries the scene name",
+				JoinCapabilities = eJoinCapabilities.ToFromSIMPL,
+				JoinType = eJoinType.DigitalSerial
+			});
+
+		/// <summary>
+		/// Which scene slots are configured
+		/// </summary>
+		[JoinName("ButtonVisibility")]
+		public JoinDataComplete ButtonVisibility = new JoinDataComplete(
+			new JoinData { JoinNumber = 41, JoinSpan = 10 },
+			new JoinMetadata
+			{
+				Description = "Area scene (1-10) is configured - visibility for the matching join 11-20",
+				JoinCapabilities = eJoinCapabilities.ToSIMPL,
 				JoinType = eJoinType.Digital
 			});
 
@@ -61,8 +103,26 @@ namespace LutronQuantum
 			new JoinData { JoinNumber = 1, JoinSpan = 1 },
 			new JoinMetadata
 			{
-				Description = "Device communication monitor status feedback",
+				Description = "Communication monitor status feedback (shared connection)",
 				JoinCapabilities = eJoinCapabilities.ToSIMPL,
+				JoinType = eJoinType.Analog
+			});
+
+		/// <summary>
+		/// Recall a scene by index
+		/// </summary>
+		/// <remarks>
+		/// Analog, not digital — the inherited map declared this as a digital while the framework
+		/// wired it as an analog. The value is a zero-based index into the configured scenes, so 0
+		/// is the first scene; an index past the end is ignored rather than throwing.
+		/// </remarks>
+		[JoinName("SelectSceneByIndex")]
+		public JoinDataComplete SelectSceneByIndex = new JoinDataComplete(
+			new JoinData { JoinNumber = 1, JoinSpan = 1 },
+			new JoinMetadata
+			{
+				Description = "Recall area scene by zero-based index (0 = first configured scene)",
+				JoinCapabilities = eJoinCapabilities.FromSIMPL,
 				JoinType = eJoinType.Analog
 			});
 
@@ -74,7 +134,7 @@ namespace LutronQuantum
 			new JoinData { JoinNumber = 2, JoinSpan = 1 },
 			new JoinMetadata
 			{
-				Description = "Device socket status feedback",
+				Description = "Socket status feedback (shared connection)",
 				JoinCapabilities = eJoinCapabilities.ToSIMPL,
 				JoinType = eJoinType.Analog
 			});
@@ -93,6 +153,19 @@ namespace LutronQuantum
 			{
 				Description = "Area name",
 				JoinCapabilities = eJoinCapabilities.ToSIMPL,
+				JoinType = eJoinType.Serial
+			});
+
+		/// <summary>
+		/// Set the area's integration ID at runtime
+		/// </summary>
+		[JoinName("AreaIdSet")]
+		public JoinDataComplete AreaIdSet = new JoinDataComplete(
+			new JoinData { JoinNumber = 1, JoinSpan = 1 },
+			new JoinMetadata
+			{
+				Description = "Set the area integration ID",
+				JoinCapabilities = eJoinCapabilities.FromSIMPL,
 				JoinType = eJoinType.Serial
 			});
 

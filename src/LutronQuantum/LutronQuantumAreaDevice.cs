@@ -91,7 +91,7 @@ namespace LutronQuantum
 				joinMap.SetCustomJoinData(customJoins);
 			}
 
-			LinkLightingToApi(this, trilist, joinMap);
+			LinkScenesToApi(trilist, joinMap);
 
 			// online and comms health belong to the shared connection, so report the parent's state
 			// to every area that depends on it
@@ -100,7 +100,7 @@ namespace LutronQuantum
 			if (_parent.SocketStatusFeedback != null)
 				_parent.SocketStatusFeedback.LinkInputSig(trilist.UShortInput[joinMap.SocketStatus.JoinNumber]);
 
-			trilist.SetStringSigAction(joinMap.IntegrationIdSet.JoinNumber, SetAreaId);
+			trilist.SetStringSigAction(joinMap.AreaIdSet.JoinNumber, SetAreaId);
 
 			trilist.SetBoolSigAction(joinMap.Raise.JoinNumber, b =>
 			{
@@ -128,6 +128,46 @@ namespace LutronQuantum
 			};
 		}
 
+		/// <summary>
+		/// Wires the scene joins.
+		/// </summary>
+		/// <remarks>
+		/// Does what the framework's LinkLightingToApi does, with two corrections: the select-by-index
+		/// join is driven as the analog it actually is, and the index is range checked — the framework
+		/// indexes the scene list directly, so a value past the end throws.
+		/// </remarks>
+		private void LinkScenesToApi(BasicTriList trilist, LutronQuantumAreaJoinMap joinMap)
+		{
+			trilist.SetUShortSigAction(joinMap.SelectSceneByIndex.JoinNumber, index =>
+			{
+				if (index >= LightingScenes.Count)
+				{
+					Debug.LogDebug(this, "Scene index {0} is out of range; {1} scene(s) configured", index, LightingScenes.Count);
+					return;
+				}
+
+				SelectScene(LightingScenes[index]);
+			});
+
+			var span = joinMap.SelectSceneDirect.JoinSpan;
+
+			if (LightingScenes.Count > span)
+			{
+				Debug.LogInformation(this, "{0} scenes configured but only {1} scene joins are available; the remainder are ignored",
+					LightingScenes.Count, span);
+			}
+
+			for (var i = 0; i < LightingScenes.Count && i < span; i++)
+			{
+				// capture per iteration so the closure binds to the right scene
+				var index = i;
+				var scene = LightingScenes[index];
+
+				trilist.SetSigTrueAction(joinMap.SelectSceneDirect.JoinNumber + (uint)index, () => SelectScene(scene));
+				scene.IsActiveFeedback.LinkInputSig(trilist.BooleanInput[joinMap.SelectSceneDirect.JoinNumber + (uint)index]);
+			}
+		}
+
 		private void UpdateBridgeFeedbacks(BasicTriList trilist, LutronQuantumAreaJoinMap joinMap)
 		{
 			trilist.SetString(joinMap.DeviceName.JoinNumber, Name);
@@ -136,6 +176,16 @@ namespace LutronQuantum
 			_parent.CommunicationMonitorFeedback.FireUpdate();
 			if (_parent.SocketStatusFeedback != null)
 				_parent.SocketStatusFeedback.FireUpdate();
+
+			var span = joinMap.SelectSceneDirect.JoinSpan;
+			for (var i = 0; i < LightingScenes.Count && i < span; i++)
+			{
+				var scene = LightingScenes[i];
+
+				trilist.SetString(joinMap.SelectSceneDirect.JoinNumber + (uint)i, scene.Name);
+				trilist.SetBool(joinMap.ButtonVisibility.JoinNumber + (uint)i, true);
+				scene.IsActiveFeedback.FireUpdate();
+			}
 		}
 
 		#endregion
