@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Crestron.SimplSharpPro.DeviceSupport;
 using PepperDash.Core;
 using PepperDash.Essentials.Core;
+using PepperDash.Essentials.Core.Bridges;
 using PepperDash.Essentials.Core.Config;
 
 namespace LutronQuantum
@@ -185,6 +187,63 @@ namespace LutronQuantum
 			}
 
 			_areasByAreaId = index;
+		}
+
+		/// <summary>
+		/// Links the comms device to the EISC bridge.
+		/// </summary>
+		/// <remarks>
+		/// Overrides the single-area implementation so the bridge carries only the joins that do
+		/// something on a device with no area of its own: online and comms health, the device name,
+		/// and the raw command passthrough. Scene, raise/lower and shade group joins are inherited
+		/// from <see cref="LutronQuantumDevice"/> but would all hit an empty-ID guard here, so they
+		/// are not published — lighting, shades and buttons are reached through the per-room child
+		/// devices instead.
+		/// </remarks>
+		/// <param name="trilist"></param>
+		/// <param name="joinStart"></param>
+		/// <param name="joinMapKey"></param>
+		/// <param name="bridge"></param>
+		public override void LinkToApi(BasicTriList trilist, uint joinStart, string joinMapKey, EiscApiAdvanced bridge)
+		{
+			var joinMap = new LutronQuantumCommsJoinMap(joinStart);
+
+			if (bridge != null)
+			{
+				bridge.AddJoinMap(Key, joinMap);
+			}
+
+			var customJoins = JoinMapHelper.TryGetJoinMapAdvancedForDevice(joinMapKey);
+			if (customJoins != null)
+			{
+				joinMap.SetCustomJoinData(customJoins);
+			}
+
+			trilist.SetStringSigAction(joinMap.Commands.JoinNumber, SendText);
+
+			OnlineFeedback.LinkInputSig(trilist.BooleanInput[joinMap.IsOnline.JoinNumber]);
+			CommunicationMonitorFeedback.LinkInputSig(trilist.UShortInput[joinMap.CommunicationMonitorStatus.JoinNumber]);
+			if (SocketStatusFeedback != null)
+				SocketStatusFeedback.LinkInputSig(trilist.UShortInput[joinMap.SocketStatus.JoinNumber]);
+
+			UpdateBridgeFeedbacks(trilist, joinMap);
+
+			trilist.OnlineStatusChange += (sender, args) =>
+			{
+				if (!args.DeviceOnLine) return;
+
+				UpdateBridgeFeedbacks(trilist, joinMap);
+			};
+		}
+
+		private void UpdateBridgeFeedbacks(BasicTriList trilist, LutronQuantumCommsJoinMap joinMap)
+		{
+			trilist.SetString(joinMap.DeviceName.JoinNumber, Name);
+
+			OnlineFeedback.FireUpdate();
+			CommunicationMonitorFeedback.FireUpdate();
+			if (SocketStatusFeedback != null)
+				SocketStatusFeedback.FireUpdate();
 		}
 
 		/// <summary>
