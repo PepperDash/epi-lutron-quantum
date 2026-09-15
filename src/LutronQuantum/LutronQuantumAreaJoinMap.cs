@@ -86,7 +86,7 @@ namespace LutronQuantum
 			new JoinData { JoinNumber = 41, JoinSpan = 10 },
 			new JoinMetadata
 			{
-				Description = "Area scene (1-10) is configured - visibility for the matching join 11-20",
+				Description = "Area scene (1-10) is configured - visibility for the scene recall join at the same offset",
 				JoinCapabilities = eJoinCapabilities.ToSIMPL,
 				JoinType = eJoinType.Digital
 			});
