@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Crestron.SimplSharp;
@@ -13,7 +13,7 @@ using PepperDash.Essentials.Core.Queues;
 using PepperDash.Essentials.Core.Lighting;
 using LightingBase = PepperDash.Essentials.Devices.Common.Lighting.LightingBase;
 
-namespace LutronQuantum
+namespace PepperDash.Essentials.Plugins
 {
 	public class LutronQuantumDevice : LightingBase, ICommunicationMonitor
 	{
@@ -114,7 +114,7 @@ namespace LutronQuantum
 		/// <summary>
 		/// Initialize
 		/// </summary>
-		public override void Initialize()
+		protected override void Initialize()
 		{
 			_comms.Connect();
 			_commsMonitor.StatusChange += (sender, args) => Debug.LogDebug(this, "Communication monitor state: {0}; message: {1}",

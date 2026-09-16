@@ -7,7 +7,7 @@ using PepperDash.Essentials.Core;
 using PepperDash.Essentials.Core.Bridges;
 using PepperDash.Essentials.Core.Config;
 
-namespace LutronQuantum
+namespace PepperDash.Essentials.Plugins
 {
 	/// <summary>
 	/// Multi-area Lutron Quantum device. Owns the single connection to the QSE-CI-NWK-E and fans

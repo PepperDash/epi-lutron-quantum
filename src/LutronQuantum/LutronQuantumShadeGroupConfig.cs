@@ -1,6 +1,6 @@
 using Newtonsoft.Json;
 
-namespace LutronQuantum
+namespace PepperDash.Essentials.Plugins
 {
 	/// <summary>
 	/// Configuration for one shade group, driven with <c>#SHADEGRP</c>.

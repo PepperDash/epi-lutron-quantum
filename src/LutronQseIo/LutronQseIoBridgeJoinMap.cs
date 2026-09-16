@@ -1,6 +1,6 @@
-﻿using PepperDash.Essentials.Core;
+using PepperDash.Essentials.Core;
 
-namespace LutronQuantum
+namespace PepperDash.Essentials.Plugins
 {
 	public class LutronQseIoBridgeJoinMap : JoinMapBaseAdvanced
 	{

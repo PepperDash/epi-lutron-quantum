@@ -1,6 +1,6 @@
 using Newtonsoft.Json;
 
-namespace LutronQuantum
+namespace PepperDash.Essentials.Plugins
 {
 	/// <summary>
 	/// One keypad button driven by a configured button.

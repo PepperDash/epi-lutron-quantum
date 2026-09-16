@@ -8,7 +8,7 @@ using PepperDash.Essentials.Core.Bridges;
 using PepperDash.Essentials.Core.Lighting;
 using LightingBase = PepperDash.Essentials.Devices.Common.Lighting.LightingBase;
 
-namespace LutronQuantum
+namespace PepperDash.Essentials.Plugins
 {
 	/// <summary>
 	/// One lighting area of a multi-area Lutron Quantum system, bridged independently of the comms

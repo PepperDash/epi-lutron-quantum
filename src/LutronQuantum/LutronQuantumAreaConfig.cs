@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using Newtonsoft.Json;
 using PepperDash.Essentials.Core.Lighting;
 
-namespace LutronQuantum
+namespace PepperDash.Essentials.Plugins
 {
 	/// <summary>
 	/// Configuration for one lighting area — scene recall and master raise/lower.

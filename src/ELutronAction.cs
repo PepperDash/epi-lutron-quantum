@@ -1,5 +1,5 @@
-﻿
-namespace LutronQuantum
+
+namespace PepperDash.Essentials.Plugins
 {
 	public enum ELutronAction : int
 	{

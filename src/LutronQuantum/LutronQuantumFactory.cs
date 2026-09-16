@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using PepperDash.Core;
 using PepperDash.Essentials.Core;
 using PepperDash.Essentials.Core.Config;
 
-namespace LutronQuantum
+namespace PepperDash.Essentials.Plugins
 {
 	public class LutronQuantumFactory : EssentialsPluginDeviceFactory<LutronQuantumDevice>
 	{
@@ -14,7 +14,7 @@ namespace LutronQuantum
 		public LutronQuantumFactory()
 		{
 			// Set the minimum Essentials Framework Version
-			MinimumEssentialsFrameworkVersion = "2.12.1";
+			MinimumEssentialsFrameworkVersion = "3.0.0";
 
 			// In the constructor we initialize the list with the typenames that will build an instance of this device
 			// only include unique typenames, when the constructur is used all the typenames will be evaluated in lower case.

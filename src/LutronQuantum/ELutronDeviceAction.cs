@@ -1,4 +1,4 @@
-namespace LutronQuantum
+namespace PepperDash.Essentials.Plugins
 {
 	/// <summary>
 	/// Action numbers for the DEVICE command.

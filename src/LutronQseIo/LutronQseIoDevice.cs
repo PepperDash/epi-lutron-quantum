@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Crestron.SimplSharp;
 using Crestron.SimplSharpPro.CrestronThread;
@@ -9,7 +9,7 @@ using PepperDash.Essentials.Core.Bridges;
 using PepperDash.Essentials.Core.Config;
 
 
-namespace LutronQuantum
+namespace PepperDash.Essentials.Plugins
 {
 	public class LutronQseIoDevice : EssentialsBridgeableDevice, ILutronDevice
     {
@@ -40,7 +40,7 @@ namespace LutronQuantum
 		/// Custom activate device
 		/// </summary>
 		/// <returns></returns>
-		public override bool CustomActivate()
+		protected override bool CustomActivate()
 		{
 			_parentDevice = DeviceManager.GetDeviceForKey(_propertiesConfig.LightingDeviceKey) as LutronQuantumDevice;
 			if (_parentDevice == null)

@@ -1,4 +1,4 @@
-namespace LutronQuantum
+namespace PepperDash.Essentials.Plugins
 {
 	/// <summary>
 	/// Configured behaviour of an emulated keypad button.

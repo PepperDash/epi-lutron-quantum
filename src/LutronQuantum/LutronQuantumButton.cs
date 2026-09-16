@@ -4,7 +4,7 @@ using System.Linq;
 using PepperDash.Core;
 using PepperDash.Essentials.Core;
 
-namespace LutronQuantum
+namespace PepperDash.Essentials.Plugins
 {
 	/// <summary>
 	/// A bridgeable button that drives one or more real keypad buttons with <c>#DEVICE</c>.

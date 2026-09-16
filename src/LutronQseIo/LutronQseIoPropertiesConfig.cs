@@ -1,6 +1,6 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 
-namespace LutronQuantum
+namespace PepperDash.Essentials.Plugins
 {
 	public class LutronQseIoPropertiesConfig
 	{

@@ -1,4 +1,4 @@
-namespace LutronQuantum
+namespace PepperDash.Essentials.Plugins
 {
 	/// <summary>
 	/// How a button reports pressed feedback when it drives more than one keypad button.

@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using Newtonsoft.Json;
 using PepperDash.Essentials.Core;
 using PepperDash.Essentials.Core.Lighting;
 
-namespace LutronQuantum
+namespace PepperDash.Essentials.Plugins
 {
 	public class LutronQuantumPropertiesConfig
 	{

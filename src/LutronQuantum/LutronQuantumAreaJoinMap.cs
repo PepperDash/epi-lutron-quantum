@@ -1,7 +1,7 @@
-﻿using PepperDash.Essentials.Core;
+using PepperDash.Essentials.Core;
 using PepperDash.Essentials.Core.Bridges;
 
-namespace LutronQuantum
+namespace PepperDash.Essentials.Plugins
 {
 	/// <summary>
 	/// Bridge join map for a single lighting area of a multi-area system.
