@@ -84,6 +84,24 @@ namespace LutronQuantum
 			});
 
 		/// <summary>
+		/// Address the device is connected to
+		/// </summary>
+		/// <remarks>
+		/// Serial 2 to match the Lutron LEAP plugin, which reports its address on the same join.
+		/// Empty when the device is on RS232, since there is no address to report — the description
+		/// says so rather than leaving an integrator to read a blank join as a fault.
+		/// </remarks>
+		[JoinName("DeviceIpAddress")]
+		public JoinDataComplete DeviceIpAddress = new JoinDataComplete(
+			new JoinData { JoinNumber = 2, JoinSpan = 1 },
+			new JoinMetadata
+			{
+				Description = "Device IP address (TCP connections only; empty on RS232)",
+				JoinCapabilities = eJoinCapabilities.ToSIMPL,
+				JoinType = eJoinType.Serial
+			});
+
+		/// <summary>
 		/// Raw command passthrough
 		/// </summary>
 		/// <remarks>

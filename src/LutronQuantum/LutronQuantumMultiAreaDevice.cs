@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Crestron.SimplSharpPro.DeviceSupport;
@@ -36,6 +36,8 @@ namespace LutronQuantum
 		private Dictionary<string, LutronQuantumAreaDevice> _areasByAreaId =
 			new Dictionary<string, LutronQuantumAreaDevice>();
 
+		private readonly string _ipAddress;
+
 		/// <summary>
 		/// Lighting area children.
 		/// </summary>
@@ -61,6 +63,12 @@ namespace LutronQuantum
 			IBasicCommunication comms)
 			: base(deviceConfig, propsConfig, comms)
 		{
+			// only meaningful on a network connection; an RS232 device has no address to report
+			var tcp = propsConfig.Control == null ? null : propsConfig.Control.TcpSshProperties;
+			_ipAddress = tcp != null && propsConfig.Control.Method != eControlMethod.Com
+				? tcp.Address
+				: string.Empty;
+
 			BuildAreas(propsConfig);
 			BuildShadeAreas(propsConfig);
 			BuildButtonGroups(propsConfig);
@@ -239,6 +247,7 @@ namespace LutronQuantum
 		private void UpdateBridgeFeedbacks(BasicTriList trilist, LutronQuantumCommsJoinMap joinMap)
 		{
 			trilist.SetString(joinMap.DeviceName.JoinNumber, Name);
+			trilist.SetString(joinMap.DeviceIpAddress.JoinNumber, _ipAddress);
 
 			OnlineFeedback.FireUpdate();
 			CommunicationMonitorFeedback.FireUpdate();
