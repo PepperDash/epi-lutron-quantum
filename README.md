@@ -1,4 +1,4 @@
-# Essentials Lutrion Quantum Plugin
+# Essentials Lutron Quantum Plugin
 
 ## Device Config
 
@@ -130,7 +130,7 @@ Standardizing on `nwk` ensures more reliable connection handling and prevents lo
 
 ## Join Map
 
-### Lutron Quantum Lighing BridgeJoinMap
+### Lutron Quantum Lighting BridgeJoinMap
 
 #### Digitals
 

@@ -64,12 +64,13 @@ namespace PepperDash.Essentials.Plugins
 			ShadeGroup2Id = propsConfig.ShadeGroup2Id;
 			_useDeviceCommands = useDeviceCommands;
 
-			Username = string.IsNullOrEmpty(propsConfig.Username) 
-				? propsConfig.Control.TcpSshProperties.Username 
+			var tcpSshProperties = propsConfig.Control.TcpSshProperties;
+			Username = string.IsNullOrEmpty(propsConfig.Username) && tcpSshProperties != null
+				? tcpSshProperties.Username 
 				: propsConfig.Username;
 
-			Password = string.IsNullOrEmpty(propsConfig.Password)
-				? propsConfig.Control.TcpSshProperties.Password
+			Password = string.IsNullOrEmpty(propsConfig.Password) && tcpSshProperties != null
+				? tcpSshProperties.Password
 				: propsConfig.Password;
 
 			if (LightingScenes == null) LightingScenes = new List<LightingScene>();
