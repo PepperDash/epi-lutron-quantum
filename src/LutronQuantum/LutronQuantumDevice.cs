@@ -484,7 +484,7 @@ namespace PepperDash.Essentials.Plugins
 							// when operating in device-command mode, handle scene feedback for our own integration ID
 							if (_useDeviceCommands && id == IntegrationId)
 							{
-								if (data.Length >= 4 && Int32.Parse(data[3]) == (int)ELutronAction.Scene)
+								if (data.Length >= 4 && Int32.Parse(data[3]) == (int)ELutronDeviceAction.Press)
 								{
 									// component number (data[2]) identifies which scene/button was activated
 									var sceneId = data[2];
