@@ -1,0 +1,120 @@
+{
+	"template": {
+		"info": {
+			"comment": "",
+			"requiredControlSofwareVersion": "",
+			"systemType": "huddle",
+			"lastModifiedDate": "2018-07-09T20:00:47.873Z",
+			"lastUid": 23,
+			"processorType": "rmc4"
+		},
+		"devices": [
+			{
+				"key": "processor",
+				"group": "processor",
+				"uid": 0,
+				"supportsCompliance": true,
+				"type": "rmc4",
+				"properties": {},
+				"name": "rmc4"
+			},
+			{
+				"key": "lights1",
+				"name": "Lutron QS",
+				"type": "lutronQuantum",
+				"group": "plugin",
+				"properties": {
+					"control": {
+						"//method": "com",
+						"controlPortDevKey": "processor",
+						"controlPortNumber": 1,
+						"comParams": {
+							"protocol": "RS232",
+							"baudRate": 115200,
+							"dataBits": 8,
+							"parity": "None",
+							"stopBits": 1,
+							"softwareHandshake": "None",
+							"hardwareHandshake": "None"
+						},
+						"method": "tcpip",
+						"tcpSshProperties": {
+							"address": "10.0.0.194",
+							"port": 2323,
+							"username": "admin",
+							"password": "password",
+							"autoReconnect": true,
+							"autoReconnectIntervalMs": 10000
+						}
+					},
+					"username": "admin",
+					"password": "lutron",
+					"integrationId": "1",
+					"shadeGroup1Id": "11",
+					"shadeGroup2Id": "12",
+					"scenes": [
+						{
+							"name": "Lights Full",
+							"id": 1
+						},
+						{
+							"name": "Lights Med",
+							"id": 2
+						},
+						{
+							"name": "Lights Low",
+							"id": 3
+						},
+						{
+							"name": "Lights Off",
+							"id": 0
+						}
+					]
+				}
+			},
+			{
+				"key": "qse-io1",
+				"name": "Lutron QSE-IO",
+				"type": "lutronQseIo",
+				"group": "plugin",
+				"properties": {
+					"lightingDeviceKey": "lights1",
+					"integrationId": "21"
+				}
+			},
+			{
+				"key": "plugin-bridge",
+				"uid": 11,
+				"name": "Plugin Bridge",
+				"group": "api",
+				"type": "eiscApiAdvanced",
+				"properties": {
+					"control": {
+						"tcpSshProperties": {
+							"address": "127.0.0.2",
+							"port": 0
+						},
+						"ipid": "A1",
+						"method": "ipidTcp"
+					},
+					"devices": [
+						{
+							"deviceKey": "lights1",
+							"joinStart": 201
+						},
+						{
+							"deviceKey": "qse-io1",
+							"joinStart": 301
+						}
+					]
+				}
+			}
+		],
+		"rooms": [],
+		"sourceLists": {},
+		"tieLines": []
+	},
+	"system": {},
+	"template_url": "",
+	"system_url": ""
+}
