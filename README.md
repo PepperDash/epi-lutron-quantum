@@ -198,3 +198,164 @@ devjson:1 {"deviceKey":"lights1", "methodName":"ShadeGroupLower", "params":[1]}
 devjson:1 {"deviceKey":"lights1", "methodName":"ResetDebugLevels", "params":[]}
 devjson:1 {"deviceKey":"lights1", "methodName":"SetDebugLevels", "params":[2]}
 ```
+<!-- START Minimum Essentials Framework Versions -->
+### Minimum Essentials Framework Versions
+
+- 2.12.1
+- 2.12.1
+<!-- END Minimum Essentials Framework Versions -->
+<!-- START Config Example -->
+### Config Example
+
+```json
+{
+    "key": "GeneratedKey",
+    "uid": 1,
+    "name": "GeneratedName",
+    "type": "LutronQuantumProperties",
+    "group": "Group",
+    "properties": {
+        "control": "SampleValue",
+        "username": "SampleString",
+        "password": "SampleString",
+        "pollTimeMs": 0,
+        "warningTimeoutMs": 0,
+        "errorTimeoutMs": 0,
+        "integrationId": "SampleString",
+        "shadeGroup1Id": "SampleString",
+        "shadeGroup2Id": "SampleString",
+        "scenes": [
+            "SampleValue"
+        ]
+    }
+}
+```
+<!-- END Config Example -->
+<!-- START Supported Types -->
+
+<!-- END Supported Types -->
+<!-- START Join Maps -->
+### Join Maps
+
+#### Digitals
+
+| Join | Type (RW) | Description |
+| --- | --- | --- |
+| 1 | R | Is online |
+| 11 | R | Button press and pressed feedback (1-20) |
+| 1 | R | Lighting system online (shared connection, not per area) |
+| 2 | R | Area raise while held, stop on release |
+| 3 | R | Area lower while held, stop on release |
+| 11 | R | Recall area scene (1-10), high while active; serial carries the scene name |
+| 41 | R | Area scene (1-10) is configured - visibility for the scene recall join at the same offset |
+| 1 | R | Is online |
+| 1 | R | Is online |
+| 2 | R | Raise all shade groups in this room |
+| 3 | R | Lower all shade groups in this room |
+| 4 | R | Stop all shade groups in this room |
+| 11 | R | Raise shade group (1-10) |
+| 21 | R | Lower shade group (1-10) |
+| 31 | R | Stop shade group (1-10) |
+| 1 | R | Contact closure feedback |
+
+#### Analogs
+
+| Join | Type (RW) | Description |
+| --- | --- | --- |
+| 1 | R | Communication monitor status feedback (shared connection) |
+| 1 | R | Recall area scene by number (1 = first configured scene; 0 is ignored) |
+| 2 | R | Socket status feedback (shared connection) |
+| 1 | R | Device communication monitor status feedback |
+| 2 | R | Device socket status feedback |
+
+#### Serials
+
+| Join | Type (RW) | Description |
+| --- | --- | --- |
+| 1 | R | Device name |
+| 11 | R | Button name (1-20) |
+| 1 | R | Area name |
+| 1 | R | Set the area integration ID |
+| 1 | R | Device Name |
+| 2 | R | Device IP address (TCP connections only; empty on RS232) |
+| 4 | R | Command Passthru |
+| 1 | R | Device name |
+| 11 | R | Shade group name (1-10) |
+| 1 | R | Device Name |
+<!-- END Join Maps -->
+<!-- START Interfaces Implemented -->
+### Interfaces Implemented
+
+- ICommunicationMonitor
+- ILutronDevice
+<!-- END Interfaces Implemented -->
+<!-- START Base Classes -->
+### Base Classes
+
+- LightingBase
+- JoinMapBaseAdvanced
+- LutronQuantumDevice
+- GenericLightingJoinMap
+- EssentialsBridgeableDevice
+- LutronQuantumPropertiesConfig
+<!-- END Base Classes -->
+<!-- START Public Methods -->
+### Public Methods
+
+- public void Press(bool pressed)
+- public bool ProcessReportedAction(string deviceId, string buttonId, ELutronDeviceAction action)
+- public void SendText(string text)
+- public void MasterRaise()
+- public void MasterLower()
+- public void MasterRaiseLowerStop()
+- public void Poll()
+- public void SetAreaId(string id)
+- public void ProcessAreaResponse(string[] data)
+- public void ReindexAreas()
+- public void SendText(string text)
+- public void SubscribeToFeedback()
+- public void MasterRaise()
+- public void MasterLower()
+- public void MasterRaiseLowerStop()
+- public void ShadeGroupRaise(string id)
+- public void ShadeGroupLower(string id)
+- public void SetIntegrationId(string id)
+- public void SetShadeGroup1Id(string id)
+- public void SetShadeGroup2Id(string id)
+- public void PrintScenes()
+- public void AddDevice(string integrationId, ILutronDevice device)
+- public void ResetDebugLevels()
+- public void SetDebugLevels(uint level)
+- public void SendText(string text)
+- public void PressButton(string name)
+- public void SetButton(string name, bool pressed)
+- public void ListButtons()
+- public void ProcessDeviceResponse(string[] data)
+- public void SendText(string text)
+- public void ShadeGroupRaise(string id)
+- public void ShadeGroupLower(string id)
+- public void ShadeGroupStop(string id)
+- public void AllRaise()
+- public void AllLower()
+- public void AllStop()
+- public void DeviceInitialize()
+- public void ProcessResponse(string[] message)
+- public void ResetDebugLevels()
+- public void SetDebugLevels(uint level)
+<!-- END Public Methods -->
+<!-- START Bool Feedbacks -->
+### Bool Feedbacks
+
+- Feedback
+- IsPressedFeedback
+- OnlineFeedback
+<!-- END Bool Feedbacks -->
+<!-- START Int Feedbacks -->
+### Int Feedbacks
+
+- CommunicationMonitorFeedback
+- SocketStatusFeedback
+<!-- END Int Feedbacks -->
+<!-- START String Feedbacks -->
+
+<!-- END String Feedbacks -->
