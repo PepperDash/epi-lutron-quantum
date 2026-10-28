@@ -8,14 +8,17 @@ namespace PepperDash.Essentials.Plugins
 	/// no area of its own.
 	/// </summary>
 	/// <remarks>
-	/// A strict subset of <see cref="LutronQuantumBridgeJoinMap"/>, keeping the joins that do
-	/// something on a comms-only device at the numbers they already had, and dropping the ones that
-	/// cannot work here.
+	/// Keeps the joins from <see cref="LutronQuantumBridgeJoinMap"/> that do something on a
+	/// comms-only device at the numbers they already had, drops the ones that cannot work here, and
+	/// adds the connected IP address on serial 2.
 	///
 	/// Dropped, because this device has no area ID and no shade group IDs — every one of these hits
 	/// an empty-ID guard and returns, so exposing them invites SIMPL to be wired to a dead join:
 	///   Digital 1 SelectScene, 2 Raise, 3 Lower, 11-20 SelectSceneDirect, 41-50 ButtonVisibility,
 	///   61-64 shade group raise/lower; Serial 1 IntegrationIdSet, 2 and 3 shade group ID set.
+	///
+	/// Serial 2 is reused as a to-SIMPL output for <see cref="DeviceIpAddress"/>. The shade group ID
+	/// set it replaces was a from-SIMPL input that never did anything on this device.
 	///
 	/// Lighting, shades and buttons are reached through the per-room child devices instead.
 	/// </remarks>
@@ -79,6 +82,24 @@ namespace PepperDash.Essentials.Plugins
 			new JoinMetadata
 			{
 				Description = "Device Name",
+				JoinCapabilities = eJoinCapabilities.ToSIMPL,
+				JoinType = eJoinType.Serial
+			});
+
+		/// <summary>
+		/// Address the device is connected to
+		/// </summary>
+		/// <remarks>
+		/// Serial 2 to match the Lutron LEAP plugin, which reports its address on the same join.
+		/// Empty when the device is on RS232, since there is no address to report — the description
+		/// says so rather than leaving an integrator to read a blank join as a fault.
+		/// </remarks>
+		[JoinName("DeviceIpAddress")]
+		public JoinDataComplete DeviceIpAddress = new JoinDataComplete(
+			new JoinData { JoinNumber = 2, JoinSpan = 1 },
+			new JoinMetadata
+			{
+				Description = "Device IP address (TCP connections only; empty on RS232)",
 				JoinCapabilities = eJoinCapabilities.ToSIMPL,
 				JoinType = eJoinType.Serial
 			});

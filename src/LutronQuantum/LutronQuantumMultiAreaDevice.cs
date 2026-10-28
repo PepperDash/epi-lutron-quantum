@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Crestron.SimplSharpPro.DeviceSupport;
@@ -36,6 +36,8 @@ namespace PepperDash.Essentials.Plugins
 		private Dictionary<string, LutronQuantumAreaDevice> _areasByAreaId =
 			new Dictionary<string, LutronQuantumAreaDevice>();
 
+		private readonly string _ipAddress;
+
 		/// <summary>
 		/// Lighting area children.
 		/// </summary>
@@ -61,6 +63,12 @@ namespace PepperDash.Essentials.Plugins
 			IBasicCommunication comms)
 			: base(deviceConfig, propsConfig, comms)
 		{
+			// only meaningful on a network connection; an RS232 device has no address to report
+			var tcp = propsConfig.Control == null ? null : propsConfig.Control.TcpSshProperties;
+			_ipAddress = tcp != null && propsConfig.Control.Method != eControlMethod.Com
+				? tcp.Address
+				: string.Empty;
+
 			BuildAreas(propsConfig);
 			BuildShadeAreas(propsConfig);
 			BuildButtonGroups(propsConfig);
@@ -195,7 +203,7 @@ namespace PepperDash.Essentials.Plugins
 		/// <remarks>
 		/// Overrides the single-area implementation so the bridge carries only the joins that do
 		/// something on a device with no area of its own: online and comms health, the device name,
-		/// and the raw command passthrough. Scene, raise/lower and shade group joins are inherited
+		/// the connected IP address, and the raw command passthrough. Scene, raise/lower and shade group joins are inherited
 		/// from <see cref="LutronQuantumDevice"/> but would all hit an empty-ID guard here, so they
 		/// are not published — lighting, shades and buttons are reached through the per-room child
 		/// devices instead.
@@ -239,6 +247,7 @@ namespace PepperDash.Essentials.Plugins
 		private void UpdateBridgeFeedbacks(BasicTriList trilist, LutronQuantumCommsJoinMap joinMap)
 		{
 			trilist.SetString(joinMap.DeviceName.JoinNumber, Name);
+			trilist.SetString(joinMap.DeviceIpAddress.JoinNumber, _ipAddress);
 
 			OnlineFeedback.FireUpdate();
 			CommunicationMonitorFeedback.FireUpdate();

@@ -355,3 +355,6 @@ MigrationBackup/
 *.projectinfo~Stashed changes
 
 *.cplz
+
+# Plugin build output (cplz/nupkg are release assets, not source)
+output/
