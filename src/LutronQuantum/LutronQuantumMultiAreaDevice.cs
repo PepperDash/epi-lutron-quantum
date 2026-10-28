@@ -203,7 +203,7 @@ namespace PepperDash.Essentials.Plugins
 		/// <remarks>
 		/// Overrides the single-area implementation so the bridge carries only the joins that do
 		/// something on a device with no area of its own: online and comms health, the device name,
-		/// and the raw command passthrough. Scene, raise/lower and shade group joins are inherited
+		/// the connected IP address, and the raw command passthrough. Scene, raise/lower and shade group joins are inherited
 		/// from <see cref="LutronQuantumDevice"/> but would all hit an empty-ID guard here, so they
 		/// are not published — lighting, shades and buttons are reached through the per-room child
 		/// devices instead.

@@ -199,6 +199,22 @@ namespace PepperDash.Essentials.Plugins
 
 			LinkLightingToApi(this, trilist, joinMap);
 
+			// Replaces the framework's zero-based, unchecked analog select so the single-area
+			// device matches LutronQuantumAreaDevice: 1-based with zero reserved, since SIMPL can
+			// push a zero as the EISC comes online, and out-of-range numbers are ignored.
+			trilist.SetUShortSigAction(joinMap.SelectScene.JoinNumber, number =>
+			{
+				if (number == 0) return;
+
+				if (number > LightingScenes.Count)
+				{
+					Debug.LogDebug(this, "Scene {0} is out of range; {1} scene(s) configured", number, LightingScenes.Count);
+					return;
+				}
+
+				SelectScene(LightingScenes[number - 1]);
+			});
+
 			LinkLutronQuantumToApi(trilist, joinMap);
 		}
 
